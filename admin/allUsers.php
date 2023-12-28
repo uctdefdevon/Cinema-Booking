@@ -10,17 +10,21 @@ if (!isset($_SESSION['logged-in'])) {
 
 require('../database/database-auth-system.php');
 
+$user = $db->Select("SELECT * FROM `users` WHERE `telegram_id` = :id",['id' => $_SESSION['telegram_id']]);
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggleAdmin'])) {
     $user_id = $_POST['user_id'];
 
-    $is_admin = $db->Select("SELECT `is_admin` FROM `users` WHERE `id` = :id", ['id' => $user_id])[0]['is_admin'];
+    if ($user[0]['id'] != $user_id) {
+        $is_admin = $db->Select("SELECT `is_admin` FROM `users` WHERE `id` = :id", ['id' => $user_id])[0]['is_admin'];
 
-    $new_is_admin = ($is_admin == 1) ? 0 : 1;
+        $new_is_admin = ($is_admin == 1) ? 0 : 1;
 
-    $db->Update("UPDATE `users` SET `is_admin` = :is_admin WHERE `id` = :id", ['is_admin' => $new_is_admin, 'id' => $user_id]);
+        $db->Update("UPDATE `users` SET `is_admin` = :is_admin WHERE `id` = :id", ['is_admin' => $new_is_admin, 'id' => $user_id]);
 
-    header('Location: allUsers.php');
-    exit();
+        header('Location: allUsers.php');
+        exit();
+    }
 }
 
 $user_data = $db->Select(
